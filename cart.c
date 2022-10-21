@@ -1,26 +1,27 @@
 #include "cart.h"
 
 double calcGini(const double *x, const int m, const int *y, const int noc, const int *nums, const int sch, const double data, const int k, int *left, int *right) {
-	double gini = 0.0;
 	int i, j, L = 0, R = 0, buf;
-    for (i = 0; i < sch; i++) {
+	for (i = 0; i < sch; i++) {
 		buf = nums[i];
-    	if (x[buf * m + k] > data) {
-    		R++;
-    		for (j = 0; j < noc; j++)
-    			if (y[buf] == j)
-    				right[j]++;
-    	} else {
-    		L++;
-    		for (j = 0; j < noc; j++)
-    			if (y[buf] == j)
-    				left[j]++;
-    	}
-    }
-    for (i = 0; i < noc; i++) {
-    	gini += ((L != 0) ? ((double)left[i] * left[i] / L) : 0.0) + ((R != 0) ? ((double)right[i] * right[i] / R) : 0.0);
-    }
-	return (double)sch - gini;
+		if (x[buf * m + k] > data) {
+			R++;
+			for (j = 0; j < noc; j++)
+				if (y[buf] == j)
+					right[j]++;
+		} else {
+			L++;
+			for (j = 0; j < noc; j++)
+				if (y[buf] == j)
+					left[j]++;
+		}
+	}
+	unsigned int lefts = 0, rights = 0;
+	for  (i = 0; i < noc; i++) {
+		lefts += left[i] * left[i];
+		rights += right[i] * right[i];
+	}
+	return (double)sch - (((double)lefts / (L == 0) ? 1 : L) + ((double)rights / (R == 0) ? 1 : R));
 }
 
 void getValueAndAtr(const double *x,const int *y, const int m, const int noc, const int *num, const int sch, double *val, int *k) {
