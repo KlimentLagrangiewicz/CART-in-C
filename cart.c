@@ -1,19 +1,15 @@
 #include "cart.h"
 
 double calcGini(const double *x, const int m, const int *y, const int noc, const int *nums, const int sch, const double data, const int k, int *left, int *right) {
-	int i, j, L = 0, R = 0, buf;
+	int i, L = 0, R = 0, buf;
 	for (i = 0; i < sch; i++) {
 		buf = nums[i];
 		if (x[buf * m + k] > data) {
 			R++;
-			for (j = 0; j < noc; j++)
-				if (y[buf] == j)
-					right[j]++;
+			right[y[buf]]++;
 		} else {
 			L++;
-			for (j = 0; j < noc; j++)
-				if (y[buf] == j)
-					left[j]++;
+			left[y[buf]]++;
 		}
 	}
 	unsigned int lefts = 0, rights = 0;
