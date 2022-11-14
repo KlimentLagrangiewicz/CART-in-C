@@ -1,4 +1,3 @@
-
 #include "help.h"
 
 void fscanfTrainData(double *x, int *y, const int n, const int m, const char *fn) {
@@ -55,39 +54,48 @@ double calcAccuracy(const int *y, const int *id, const int n) {
 	return (double)j / (double)n;
 }
 
-void fprintfResult(const int *y, const int n, const char *fn) {
+void fprintfResult(const int *y, const int n, long long l1, long long l2, const char *fn) {
 	FILE *fl;
 	if ((fl = fopen(fn, "a")) == NULL) {
 		printf("Error in opening %s result file\n", fn);
 		exit(1);
 	}
-	int i;
-	fprintf(fl, "Result of CART classification...\n");
-	for (i = 0; i < n; i++)
+	fprintf(fl, "Result of CART classification...\nCreation binary tree time:  %lld number of processor clock cycles;\n"
+			    "Time of receiving classes:  %lld number of processor clock cycles;\n"
+			    "Time of CART:  %lld number of processor clock cycles;\n", l1, l2, l1 + l2);
+	int i = 0;
+	while (i < n) {
 		fprintf(fl, "Object[%d]: %d;\n", i, y[i]);
+		i++;
+	}
 	fprintf(fl, "\n");
 	fclose(fl);
 }
 
-void fprintfFullRes(const int *y, const int n, const double a, const char *fn) {
+void fprintfFullRes(const int *y, const int n, const double a, long long l1, long long l2, const char *fn) {
 	FILE *fl;
 	if ((fl = fopen(fn, "a")) == NULL) {
 		printf("Error in opening %s result file\n", fn);
 		exit(1);
 	}
-	int i;
-	fprintf(fl, "Result of CART classification...\n");
-	fprintf(fl, "Accuracy of classification = %lf;\n", a);
-	for (i = 0; i < n; i++)
+	fprintf(fl, "Result of CART classification...\n"
+			    "Accuracy of classification = %lf;\n"
+			    "Creation binary tree time:  %lld number of processor clock cycles;\n"
+			    "Time of receiving classes:  %lld number of processor clock cycles;\n"
+			    "Time of CART:  %lld number of processor clock cycles;\n", a, l1, l2, l1 + l2);
+	int i = 0;
+	while (i < n) {
 		fprintf(fl, "Object[%d]: %d;\n", i, y[i]);
+		i++;
+	}
 	fprintf(fl, "\n");
 	fclose(fl);
 }
 
 int getNumOfClass(const int *y, const int n) {
 	int i, j, cur;
-	short *v = (short*)malloc(n * sizeof(short));
-	memset(v, 0, n * sizeof(short));
+	char *v = (char*)malloc(n * sizeof(char));
+	memset(v, 0, n * sizeof(char));
 	for (i = 0; i < n; i++) {
 		while ((v[i]) && (i < n)) i++;
 		cur = y[i];
@@ -96,13 +104,11 @@ int getNumOfClass(const int *y, const int n) {
 				v[j] = 1;
 		}
 	}
-	cur = 0;
-	for (i = 0; i < n; i++) {
+	i = cur = 0;
+	while (i < n) {
 		if (v[i] == 0) cur++;
+		i++;
 	}
 	free(v);
 	return cur;
 }
-
-
-

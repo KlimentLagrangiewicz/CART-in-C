@@ -29,7 +29,8 @@ int main(int argc, char **argv) {
 		printf("Not enough parameters...\n");
 		exit(1);
 	}
-	int n = atoi(argv[1]), m = atoi(argv[2]), n2 = atoi(argv[3]), noc, i;
+	const int n = atoi(argv[1]), m = atoi(argv[2]), n2 = atoi(argv[3]);
+	int i, noc;
 	double *xtrain = (double*)malloc(n * m * sizeof(double));
 	int *y = (int *)malloc(n * sizeof(int));
 	fscanfTrainData(xtrain, y, n, m, argv[4]);
@@ -53,10 +54,10 @@ int main(int argc, char **argv) {
 		int *id = (int*)malloc(n2 * sizeof(int));
 		fscanfIdealSpliting(id, n2, argv[7]);
 		double a = calcAccuracy(res, id, n2);
-		fprintfFullRes(res, n2, a, argv[6]);
+		fprintfFullRes(res, n2, a, l1, l2, argv[6]);
 		free(id);
 	} else {
-		fprintfResult(res, n2, argv[6]);
+		fprintfResult(res, n2, l1, l2, argv[6]);
 	}
 	printf("Creation binary tree time:  %lld number of processor clock cycles;\n", l1);
 	printf("Time of receiving classes:  %lld number of processor clock cycles;\n", l2);

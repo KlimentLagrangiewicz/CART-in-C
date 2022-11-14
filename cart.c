@@ -1,8 +1,9 @@
 #include "cart.h"
 
 double calcGini(const double *x, const int m, const int *y, const int noc, const int *nums, const int sch, const double data, const int k, int *left, int *right) {
-	int i, L = 0, R = 0, buf;
-	for (i = 0; i < sch; i++) {
+	int i, L, R, buf;
+	i = L = R = 0;
+	while (i < sch) {
 		buf = nums[i];
 		if (x[buf * m + k] > data) {
 			R++;
@@ -11,6 +12,7 @@ double calcGini(const double *x, const int m, const int *y, const int noc, const
 			L++;
 			left[y[buf]]++;
 		}
+		i++;
 	}
 	unsigned int lefts = 0, rights = 0;
 	for  (i = 0; i < noc; i++) {
@@ -21,23 +23,24 @@ double calcGini(const double *x, const int m, const int *y, const int noc, const
 }
 
 void getValueAndAtr(const double *x,const int *y, const int m, const int noc, const int *num, const int sch, double *val, int *k) {
-	double opt_data = x[num[0]], cur_gini;
+	double opt_data = x[num[0] * m], cur_gini;
 	int i, j, buf, opt_k = 0;
-	int *left = (int*)malloc(noc * sizeof(int));
-	int *right = (int*)malloc(noc * sizeof(int));
-	memset(left, 0, noc * sizeof(int));
-	memset(right, 0, noc * sizeof(int));
-	double min_gini = calcGini(x, m, y, noc, num, sch, opt_data, opt_k, left, right);
+	const size_t size = noc * sizeof(int);
+	int *left = (int*)malloc(size);
+	int *right = (int*)malloc(size);
+	memset(left, 0, size);
+	memset(right, 0, size);
+	double min_gini = DBL_MAX;
 	for (j = 0; j < sch; j++) {
-		buf = num[j];
+		buf = num[j] * m;
 		for (i = 0; i < m; i++) {
-			memset(left, 0, noc * sizeof(int));
-			memset(right, 0, noc * sizeof(int));
-			cur_gini = calcGini(x, m, y, noc, num, sch, x[buf * m + i], i, left, right);
+			memset(left, 0, size);
+			memset(right, 0, size);
+			cur_gini = calcGini(x, m, y, noc, num, sch, x[buf + i], i, left, right);
 			if (cur_gini < min_gini) {
 				min_gini = cur_gini;
 				opt_k = i;
-				opt_data = x[buf * m + i];
+				opt_data = x[buf + i];
 			}
 		}
 	}
@@ -47,11 +50,13 @@ void getValueAndAtr(const double *x,const int *y, const int m, const int noc, co
 	*k = opt_k;
 }
 
-short list(const int *y, const int *numbers, const int sch) {
-	int i, value = y[numbers[0]];
-	for (i = 0; i < sch; i++) {
-		if (y[numbers[i]] != value)
+char list(const int *y, const int *numbers, const int sch) {
+	int i = 0, value = y[*numbers];
+	while (i < sch) {
+		if (y[*(numbers)] != value)
 			return 0;
+		numbers++;
+		i++;
 	}
 	return 1;
 }
@@ -63,20 +68,26 @@ void addIntVect(int **vect, int *size, const int value) {
 }
 
 void createBinTree(btree *tree, const double *x, const int *y, const int m, const int *numbers, const int sch, const int noc) {
-	if (!list(y, numbers, sch)) {
+	if (list(y, &numbers[0], sch)) {
+		tree->left = NULL;
+		tree->right = NULL;
+		tree->num_q = y[numbers[0]];
+	} else {
 		double val;
-		int i, k, nol = 0, nor = 0;
+		int i, k, nol, nor;
 		getValueAndAtr(x, y, m, noc, numbers, sch, &val, &k);
 		tree->data = val;
 		tree->num_q = k;
 		int *lefts = (int*)malloc(0 * sizeof(int));
 		int *rights = (int*)malloc(0 * sizeof(int));
-		for (i = 0; i < sch; i++) {
-			if (x[numbers[i]* m + k] > val) {
+		i = nol = nor = 0;
+		while (i < sch) {
+			if (x[numbers[i] * m + k] > val) {
 				addIntVect(&rights, &nor, numbers[i]);
 			} else {
 				addIntVect(&lefts, &nol, numbers[i]);
 			}
+			i++;
 		}
 		tree->right = (btree*)malloc(sizeof(btree));
 		tree->left = (btree*)malloc(sizeof(btree));
@@ -84,25 +95,20 @@ void createBinTree(btree *tree, const double *x, const int *y, const int m, cons
 		free(rights);
 		createBinTree(tree->left, x, y, m, lefts, nol, noc);
 		free(lefts);
-	} else {
-		tree->left = NULL;
-		tree->right = NULL;
-		tree->num_q = y[numbers[0]];
 	}
 }
 
 int getClass(const btree *tree, const double *x, const int m, const int l) {
-	int cl;
 	if ((tree->left == NULL) || (tree->right == NULL))
-		cl = tree->num_q;
-	else cl = ((x[m * l + tree->num_q] > (tree->data)) ? getClass(tree->right, x, m, l) : getClass(tree->left, x, m, l));
-	return cl;
+		return tree->num_q;
+	return ((x[m * l + tree->num_q] > (tree->data)) ? getClass(tree->right, x, m, l) : getClass(tree->left, x, m, l));
 }
 
 void getClasses(const btree *tree, const double *x, int *res, const int n, const int m) {
-	int i;
-	for (i = 0; i < n; i++) {
+	int i = 0;
+	while (i < n) {
 		res[i] = getClass(tree, x, m, i);
+		i++;
 	}
 }
 
