@@ -14,22 +14,22 @@ double calcGini(const double *x, const int m, const int *y, const int noc, const
 		}
 		i++;
 	}
-	unsigned int lefts = 0, rights = 0;
-	for  (i = 0; i < noc; i++) {
+	unsigned int lefts, rights;
+	i = lefts = rights = 0;
+	while (i < noc) {
 		lefts += left[i] * left[i];
 		rights += right[i] * right[i];
+		i++;
 	}
 	return (double)sch - (((double)lefts / (L == 0) ? 1 : L) + ((double)rights / (R == 0) ? 1 : R));
 }
 
-void getValueAndAtr(const double *x,const int *y, const int m, const int noc, const int *num, const int sch, double *val, int *k) {
+void getValueAndAtr(const double *x, const int *y, const int m, const int noc, const int *num, const int sch, double *val, int *k) {
 	double opt_data = x[num[0] * m], cur_gini;
 	int i, j, buf, opt_k = 0;
 	const size_t size = noc * sizeof(int);
 	int *left = (int*)malloc(size);
 	int *right = (int*)malloc(size);
-	memset(left, 0, size);
-	memset(right, 0, size);
 	double min_gini = DBL_MAX;
 	for (j = 0; j < sch; j++) {
 		buf = num[j] * m;

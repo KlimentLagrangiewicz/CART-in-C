@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
 		double a = calcAccuracy(res, id, n2);
 		fprintfFullRes(res, n2, a, l1, l2, argv[6]);
 		free(id);
+		printf("Accuracy of classification by CART  = %lf;\n", a);
 	} else {
 		fprintfResult(res, n2, l1, l2, argv[6]);
 	}
