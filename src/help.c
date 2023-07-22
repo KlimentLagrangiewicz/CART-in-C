@@ -92,7 +92,7 @@ void fprintfFullRes(const int *y, const int n, const double a, long long l1, lon
 	fclose(fl);
 }
 
-int getNumOfClass(const int *y, const int n) {
+int getNumOfClass(const int* const y, const int n) {
 	int i, j, cur;
 	char *v = (char*)malloc(n * sizeof(char));
 	memset(v, 0, n * sizeof(char));

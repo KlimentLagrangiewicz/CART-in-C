@@ -1,6 +1,6 @@
 #include "cart.h"
 
-double calcGini(const double *x, const int m, const int *y, const int noc, const int *nums, const int sch, const double data, const int k, int *left, int *right) {
+double calcGini(const double* const x, const int m, const int* const y, const int noc, const int* const nums, const int sch, const double data, const int k, int* const left, int* const right) {
 	int i, L, R, buf;
 	i = L = R = 0;
 	while (i < sch) {
@@ -21,10 +21,10 @@ double calcGini(const double *x, const int m, const int *y, const int noc, const
 		rights += right[i] * right[i];
 		i++;
 	}
-	return (double)sch - (((double)lefts / (L == 0) ? 1 : L) + ((double)rights / (R == 0) ? 1 : R));
+	return (double)sch - ((L == 0) ? 1.0 : ((double)lefts / L)) - ((R == 0) ? 1.0 : ((double)rights / R));
 }
 
-void getValueAndAtr(const double *x, const int *y, const int m, const int noc, const int *num, const int sch, double *val, int *k) {
+void getValueAndAtr(const double* const x, const int* const y, const int m, const int noc, const int* const num, const int sch, double* const val, int* const k) {
 	double opt_data = x[num[0] * m], cur_gini;
 	int i, j, buf, opt_k = 0;
 	const size_t size = noc * sizeof(int);
@@ -50,7 +50,7 @@ void getValueAndAtr(const double *x, const int *y, const int m, const int noc, c
 	*k = opt_k;
 }
 
-char list(const int *y, const int *numbers, const int sch) {
+char list(const int* const y, const int *numbers, const int sch) {
 	int i = 0, value = y[*numbers];
 	while (i < sch) {
 		if (y[*(numbers)] != value)
@@ -59,12 +59,6 @@ char list(const int *y, const int *numbers, const int sch) {
 		i++;
 	}
 	return 1;
-}
-
-void addIntVect(int **vect, int *size, const int value) {
-	*vect = (int*)realloc(*vect, (*size + 1) * sizeof(int));
-	*(*vect + *size) = value;
-	*size += 1;
 }
 
 void createBinTree(btree *tree, const double *x, const int *y, const int m, const int *numbers, const int sch, const int noc) {
@@ -83,9 +77,13 @@ void createBinTree(btree *tree, const double *x, const int *y, const int m, cons
 		i = nol = nor = 0;
 		while (i < sch) {
 			if (x[numbers[i] * m + k] > val) {
-				addIntVect(&rights, &nor, numbers[i]);
+			    rights = (int*)realloc(rights, (nor + 1) * sizeof(int));
+			    rights[nor] = numbers[i];
+			    nor++;				
 			} else {
-				addIntVect(&lefts, &nol, numbers[i]);
+				lefts = (int*)realloc(lefts, (nol + 1) * sizeof(int));
+				lefts[nol] = numbers[i];
+			    nol++;	
 			}
 			i++;
 		}
@@ -98,16 +96,17 @@ void createBinTree(btree *tree, const double *x, const int *y, const int m, cons
 	}
 }
 
-int getClass(const btree *tree, const double *x, const int m, const int l) {
+int getClass(const btree* const tree, const double* const x, const int id) {
 	if ((tree->left == NULL) || (tree->right == NULL))
 		return tree->num_q;
-	return ((x[m * l + tree->num_q] > (tree->data)) ? getClass(tree->right, x, m, l) : getClass(tree->left, x, m, l));
+	return ((x[id + tree->num_q] > (tree->data)) ? getClass(tree->right, x, id) : getClass(tree->left, x, id));
 }
 
-void getClasses(const btree *tree, const double *x, int *res, const int n, const int m) {
-	int i = 0;
+void getClasses(const btree* const tree, const double* const x, int* const res, const int n, const int m) {
+	int i = 0, j = 0;
 	while (i < n) {
-		res[i] = getClass(tree, x, m, i);
+		res[i] = getClass(tree, x, j);
+		j += m;
 		i++;
 	}
 }
