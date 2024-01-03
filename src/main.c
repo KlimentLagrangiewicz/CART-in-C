@@ -44,10 +44,10 @@ int main(int argc, char **argv) {
 	for (i = 0; i < n; i++) {
 		startNums[i] = i;
 	}
-	createBinTree(tree, xtrain, y, m, startNums, n, noc);
+	create_bin_tree(tree, xtrain, y, m, startNums, n, noc);
 	l1 = time_stop();
 	time_start();
-	getClasses(tree, xtest, res, n2, m);
+	get_classes(tree, xtest, res, n2, m);
 	l2 = time_stop();
 	if (argc > 7) {
 		int *id = (int*)malloc(n2 * sizeof(int));
@@ -68,6 +68,6 @@ int main(int argc, char **argv) {
 	free(xtest);
 	free(xtrain);
 	free(y);
-	freeBinTree(tree);
+	free_bin_tree(tree);
 	return 0;
 }
