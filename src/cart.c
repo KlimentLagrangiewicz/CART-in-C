@@ -2,9 +2,8 @@
 
 
 double calc_gini(const double* const x, const int m, const int* const y, const int noc, const int* const nums, const int sch, const double data, const int k, int* const left, int* const right) {
-	int i, L, R, buf;
-	i = L = R = 0;
-	while (i < sch) {
+	int i, L = 0, R = 0, buf;
+	for (i = 0; i < sch; i++) {
 		buf = nums[i];
 		if (x[buf * m + k] > data) {
 			R++;
@@ -13,25 +12,21 @@ double calc_gini(const double* const x, const int m, const int* const y, const i
 			L++;
 			left[y[buf]]++;
 		}
-		i++;
 	}
-	unsigned int lefts, rights;
-	i = lefts = rights = 0;
-	while (i < noc) {
+	unsigned int lefts = 0, rights = 0;	
+	for (i = 0; i < noc; i++) {
 		lefts += left[i] * left[i];
 		rights += right[i] * right[i];
-		i++;
 	}
-	return (L == 0 || R == 0) ? sch : sch - ((double)lefts / L -  (double)rights / R); /*(double)sch - ((L == 0) ? 1.0 : ((double)lefts / L)) - ((R == 0) ? 1.0 : ((double)rights / R))*/;
+	return (L == 0 || R == 0) ? sch : (sch - ((double)lefts / L -  (double)rights / R));
 }
 
 void get_value_and_attribute(const double* const x, const int* const y, const int m, const int noc, const int* const num, const int sch, double* const val, int* const k) {
-	double opt_data = x[num[0] * m], cur_gini;
-	int i, j, buf, opt_k = 0;
 	const size_t size = noc * sizeof(int);
 	int *left = (int*)malloc(size);
 	int *right = (int*)malloc(size);
-	double min_gini = calc_gini(x, m, y, noc, num, sch, x[*num], 0, left, right)/*DBL_MAX*/;
+	double opt_data = x[*num * m], cur_gini, min_gini = calc_gini(x, m, y, noc, num, sch, opt_data, 0, left, right);
+	int i, j, buf, opt_k = 0;
 	for (j = 0; j < sch; j++) {
 		buf = num[j] * m;
 		for (i = 0; i < m; i++) {
@@ -63,17 +58,17 @@ void create_bin_tree(btree *tree, const double *x, const int *y, const int m, co
 	if (is_list(y, numbers, sch)) {
 		tree->left = NULL;
 		tree->right = NULL;
-		tree->num_q = y[numbers[0]];
+		tree->num_q = y[*numbers];
 	} else {
 		double val;
-		int i, k, nol, nor;
+		int k;
 		get_value_and_attribute(x, y, m, noc, numbers, sch, &val, &k);
 		tree->data = val;
 		tree->num_q = k;
 		int *lefts = (int*)malloc(0 * sizeof(int));
 		int *rights = (int*)malloc(0 * sizeof(int));
-		i = nol = nor = 0;
-		while (i < sch) {
+		int i, nol = 0, nor = 0;
+		for (i = 0; i < sch; i++) {
 			if (x[numbers[i] * m + k] > val) {
 				rights = (int*)realloc(rights, (nor + 1) * sizeof(int));
 				rights[nor] = numbers[i];
@@ -83,7 +78,6 @@ void create_bin_tree(btree *tree, const double *x, const int *y, const int m, co
 				lefts[nol] = numbers[i];
 			    	nol++;	
 			}
-			i++;
 		}
 		tree->right = (btree*)malloc(sizeof(btree));
 		tree->left = (btree*)malloc(sizeof(btree));
@@ -95,9 +89,7 @@ void create_bin_tree(btree *tree, const double *x, const int *y, const int m, co
 }
 
 int get_class(const btree* const tree, const double* const x, const int id) {
-	if ((tree->left == NULL) || (tree->right == NULL))
-		return tree->num_q;
-	return ((x[id + tree->num_q] > (tree->data)) ? get_class(tree->right, x, id) : get_class(tree->left, x, id));
+	return (tree->left == NULL || tree->right == NULL) ? tree->num_q : ((x[id + tree->num_q] > tree->data) ? get_class(tree->right, x, id) : get_class(tree->left, x, id));
 }
 
 void get_classes(const btree* const tree, const double* const x, int* const res, int n, const int m) {	
