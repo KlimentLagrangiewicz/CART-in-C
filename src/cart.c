@@ -23,8 +23,8 @@ double calc_gini(const double* const x, const int m, const int* const y, const i
 
 void get_value_and_attribute(const double* const x, const int* const y, const int m, const int noc, const int* const num, const int sch, double* const val, int* const k) {
 	const size_t size = noc * sizeof(int);
-	int *left = (int*)malloc(size);
-	int *right = (int*)malloc(size);
+	int *left = (int*)calloc(noc, sizeof(int));
+	int *right = (int*)calloc(noc, sizeof(int));
 	double opt_data = x[*num * m], cur_gini, min_gini = calc_gini(x, m, y, noc, num, sch, opt_data, 0, left, right);
 	int i, j, buf, opt_k = 0;
 	for (j = 0; j < sch; j++) {
@@ -76,7 +76,7 @@ void create_bin_tree(btree *tree, const double *x, const int *y, const int m, co
 			} else {
 				lefts = (int*)realloc(lefts, (nol + 1) * sizeof(int));
 				lefts[nol] = numbers[i];
-			    	nol++;	
+				nol++;	
 			}
 		}
 		tree->right = (btree*)malloc(sizeof(btree));
