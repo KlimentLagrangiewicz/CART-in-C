@@ -4,13 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct btree btree;
-struct btree {
+typedef struct btree {
 	double data;
 	int num_q;
-	btree* left;
-	btree* right;
-};
+	struct btree* left;
+	struct btree* right;
+} btree;
 
 double calc_gini(const double* const x, const int m, const int* const y, const int noc, const int* const nums, const int sch, const double data, const int k, int* const left, int* const right);
 void get_value_and_attribute(const double* const x, const int* const y, const int m, const int noc, const int* const num, const int sch, double* const val, int* const k);
