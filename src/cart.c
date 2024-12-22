@@ -88,18 +88,17 @@ void create_bin_tree(btree *tree, const double *x, const int *y, const int m, co
 	}
 }
 
-int get_class(const btree* const tree, const double* const x, const int id) {
-	return (tree->left == NULL || tree->right == NULL) ? tree->num_q : ((x[id + tree->num_q] > tree->data) ? get_class(tree->right, x, id) : get_class(tree->left, x, id));
+int get_class(const btree* tree, const double* const x) {
+	while (tree->left != NULL && tree->right != NULL) tree = (x[tree->num_q] > tree->data) ? tree->right : tree->left;
+	return tree->num_q;
 }
 
-void get_classes(const btree* const tree, const double* const x, int* const res, int n, const int m) {	
-	while (n--) {
-		res[n] = get_class(tree, x, n * m);		
-	}
+void get_classes(const btree* const tree, const double* const x, int* const res, int n, const int m) {
+	while (n--) res[n] = get_class(tree, x + n * m);
 }
 
 void free_bin_tree(btree *tree) {
-	if (tree != NULL) {
+	if (tree) {
 		free_bin_tree(tree->left);
 		free_bin_tree(tree->right);
 		free(tree);

@@ -15,7 +15,7 @@ double calc_gini(const double* const x, const int m, const int* const y, const i
 void get_value_and_attribute(const double* const x, const int* const y, const int m, const int noc, const int* const num, const int sch, double* const val, int* const k);
 char is_list(const int* const y, const int *numbers, int sch);
 void create_bin_tree(btree *tree, const double *x, const int *y, const int m, const int *numbers, const int sch, const int noc);
-int get_class(const btree* const tree, const double* const x, const int id);
+int get_class(const btree* tree, const double* const x);
 void get_classes(const btree* const tree, const double* const x, int* const res, int n, const int m);
 void free_bin_tree(btree *tree);
 

@@ -1,27 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "help.h"
 #include "cart.h"
 
-long long TimeValue = 0;
-
-unsigned long long time_RDTSC() {
-	union ticks {
-		unsigned long long tx;
-		struct dblword {
-			long tl, th;
-		} dw;
-	} t;
-	__asm__ ("rdtsc\n"
-	  : "=a" (t.dw.tl), "=d"(t.dw.th)
-	  );
-	return t.tx;
-}
-
-void time_start() { TimeValue = time_RDTSC(); }
-
-long long time_stop() { return time_RDTSC() - TimeValue; }
 
 int main(int argc, char **argv) {
 	if (argc < 7) {
@@ -36,8 +19,8 @@ int main(int argc, char **argv) {
 	double *xtest = (double*)malloc(n2 * m * sizeof(double));
 	fscanfTestData(xtest, n2 * n, argv[5]);
 	int *res = (int*)malloc(n2 * sizeof(int));
-	long long l1, l2;
-	time_start();
+	double t1, t2;
+	t1 = clock();
 	btree *tree = (btree*)malloc(sizeof(btree));
 	noc = getNumOfClass(y, n);
 	int *startNums = (int*)malloc(n * sizeof(int));
@@ -45,24 +28,26 @@ int main(int argc, char **argv) {
 		startNums[i] = i;
 	}
 	create_bin_tree(tree, xtrain, y, m, startNums, n, noc);
-	l1 = time_stop();
-	time_start();
+	t1 = clock() - t1;
+	t1 /= CLOCKS_PER_SEC;
+	t2 = clock();
 	get_classes(tree, xtest, res, n2, m);
-	l2 = time_stop();
+	t2 = clock() - t2;
+	t2 /= CLOCKS_PER_SEC;
 	if (argc > 7) {
 		int *id = (int*)malloc(n2 * sizeof(int));
 		fscanfIdealSpliting(id, n2, argv[7]);
 		double a = calcAccuracy(res, id, n2);
-		fprintfFullRes(res, n2, a, l1, l2, argv[6]);
+		fprintfFullRes(res, n2, a, t1, t2, argv[6]);
 		free(id);
 		printf("Accuracy of classification by CART  = %lf;\n", a);
 	} else {
-		fprintfResult(res, n2, l1, l2, argv[6]);
+		fprintfResult(res, n2, t1, t2, argv[6]);
 	}
-	printf("Creation binary tree time:  %lld number of processor clock cycles;\n", l1);
-	printf("Time of receiving classes:  %lld number of processor clock cycles;\n", l2);
-	printf("Time of CART:  %lld number of processor clock cycles;\n", l1 + l2);
-	printf("The work of the program is completed!\n");
+	printf("Creation binary tree time:  %lf s.;\n", t1);
+	printf("Time of receiving classes:  %lf s.;\n", t2);
+	printf("Time of CART:  %lf s.;\n", t1 + t2);
+	printf("The work of the program is completed\n");
 	free(startNums);
 	free(res);
 	free(xtest);
